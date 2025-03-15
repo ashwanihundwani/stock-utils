@@ -1,0 +1,3 @@
+Branch name should start with "feature" or "bugfix" followed by forward slash then followed by a string with has 1 hyphen in between, not in first or last
+ 
+Commit message - branchname followed by ":" then space then message. In message First Letter of first word should be capital
