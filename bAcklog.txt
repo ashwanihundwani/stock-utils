@@ -1,0 +1,58 @@
+ 
+1. Performance Profiling on Dynamic Theme Change
+Performance impact needs to be analyzed when switching themes dynamically.
+Action needed: Conduct profiling and report findings. Will do this as a part of our performance measures.
+
+2. API Cache Invalidation
+RTKQuery provides support for cache invalidation for API responses we receive. It depends on case-to-case basis. This needs to be taken care of during the development of APIs. Hence there should not be a need to showcase any capabilities here. 
+We will document this during development with distinct examples to showcase it on the go.
+Documentation:
+https://redux-toolkit.js.org/rtk-query/usage/automated-refetching?_sm_au_=iVVjLP6R5ZMqZJ5QM7BKNK07qH22M
+
+No concrete action needed.
+
+ 
+3. AppIce SDK NPM Integration
+To implement App Ice SDK in the application. Also, the business cases associated with this.
+Need the business cases for this from GIB
+ 
+4. Dynatrace Integration
+To implement Dynatrace SDK in the application. And also, the business cases associated with this.
+Need the business cases for this from GIB. Need to agree on strategy etc.
+
+5. SSL Pinning 
+Basic SSL Pinning is implemented. 
+Action Item: We need to complete the integration with the valid certificates. 
+The remaining action item is to decide a strategy to switch certs in production. Should be a future Sprint task
+ 
+6. Encryption Algorithm Validation
+Action Item: Validate the encryption algorithm with the VBL team to ensure security compliance.
+ 
+7. Code Obfuscation (Android & Web)
+Action Item: A Sprint task to check and be compliant with Security measures for code in TS, iOS, Android & Web in the upcoming Sprint(s)
+
+8. Admin Configuration
+If the admin configuration fails, the customer will be unable to proceed beyond the login screen.
+The following steps will be followed to ensure proper configuration:
+
+First Installation: Call the service and save the timestamp.
+Foreground Activation: When the customer returns to the foreground, check the saved timestamp. If it exceeds the defined threshold, call the service again.
+App Kill and Relaunch: Call the service upon relaunch.
+
+Action Item: A sprint task to implement this Strategy and also what all configurations we will need from the business.
+
+9. Menu Changes
+If a customer ID is available on the device, menu request should trigger with login request; otherwise, it should be retrieved post-login.
+The menu should support three levels of submenus at least.
+All UI components, including buttons, should be built using a base component that enables or disables them based on feature configuration.
+Conditional logic (e.g., if/else checks) should not be added to the navigation flow; instead, this should be handled within the button components.
+
+Action Item: A sprint task to implement this on Frontend and Backend. 
+
+
+10. Common API Error Handling
+Error handling should be centralized across the application.
+Based on the error code, customers should be automatically navigated to the appropriate error page
+Action Item: A sprint task to implement this Strategy
+
+
