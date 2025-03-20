@@ -102,4 +102,190 @@ Minor	NA		100%	80%	0%		" 80% Mob ETA (17th Mar)
     "AuthenticationTrustedDeviceNegativePopupBtnCancelWeb": "Cancel",
     "AuthenticationTrustedDeviceNegativePopupBtnRemoveWeb": "Remove",
     "TimeoutLoginLblBtmsubtitleWeb": "For your security, your session has ended. Log in again to continue.",
+
+
+
+
+import React, {useState} from 'react';
+import {View} from 'react-native';
+import * as Components from '@app/components';
+import {useFormik} from 'formik';
+import {
+  OnboardingNonUsTaxDeclarationIdentificationInitialValues,
+  OnboardingNonUsTaxDeclarationIdentificationSchema,
+} from '@app/features/onboarding/schemas/onboarding-tax-identification-number';
+import {translation, Theme, useNewTheme} from 'react-core';
+import {getStyles} from './styles';
+import {variants} from 'app/components/label/types';
+import {TaxIdentificationNumberScreenProperties} from './types';
+import {SizeType, TabItemType} from 'app/components/tab/types';
+import {
+  ButtonSizes,
+  ButtonTypes,
+  ButtonVariants,
+} from 'app/components/custom-button/types';
+import {OnboardingRoutes, PhoneNumberLength9} from 'app/constants';
+import {OptionItemType} from 'app/components/option-button/types';
+
+const TaxIdentificationNumber: React.FC<
+  TaxIdentificationNumberScreenProperties
+> = ({navigation}) => {
+  const theme: Theme = useNewTheme();
+  const styles = getStyles(theme);
+  const {t} = translation.useTranslation();
+  const DATA: TabItemType[] = [
+    {id: 1, name: t('OnboardingTaxIdentificationNumberChip1')},
+    {id: 2, name: t('OnboardingTaxIdentificationNumberChip2')},
+  ];
+  const ReasonData = [
+    {id: '1', name: 'Not required'},
+    {id: '2', name: 'Temporary Visitor'},
+  ];
+  const [selectedTab, setSelectedTab] = useState<TabItemType>();
+  const [visible, setVisible] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<OptionItemType>();
+  const onSelectItem = (item: OptionItemType) => {
+    setSelectedOption(item);
+    formik.setFieldValue('reason', item.name);
+    setVisible(false);
+  };
+
+  const disableButton = (): boolean => {
+    if (selectedTab?.name === 'Yes' && formik.values.identificationNumber) {
+      return false;
+    } else if (selectedTab?.name === 'No' && formik.values.reason) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const formik = useFormik({
+    validateOnChange: true,
+    validateOnBlur: true,
+    initialValues: OnboardingNonUsTaxDeclarationIdentificationInitialValues,
+    validationSchema: OnboardingNonUsTaxDeclarationIdentificationSchema,
+    onSubmit: () => {
+      navigation.navigate(OnboardingRoutes.Status, {
+        name: 'status',
+      });
+    },
+  });
+
+  return (
+    <Components.ScreenContainer
+      id="vwOnboardingNonUsTaxDeclarationIdentification"
+      showGoBackIcon
+      bottomScreenContent={
+        <View id="vwStickyButtonBar" style={styles.vwStickyButtonBarStyles}>
+          <Components.Button
+            id="btnNext"
+            inverted={false}
+            label={t('OnboardingTaxTypeBtnNext')}
+            type={ButtonTypes.text}
+            variant={ButtonVariants.primary}
+            size={ButtonSizes.large}
+            disabled={disableButton()}
+            onPress={formik.handleSubmit}
+          />
+        </View>
+      }>
+      <View id="vwContainer" style={styles.containerStyle}>
+        <View id="vwHeader" style={styles.headerStyle}>
+          <View id="vwText" style={styles.textStyle}>
+            <Components.Label
+              id="lblTitle"
+              style={styles.lblTitleStyle}
+              variant={variants.titleXL}
+              text={t('OnboardingTaxIdentificationNumberLblTitle')}
+            />
+            <Components.Label
+              id="lblSubtitle"
+              style={styles.lblSubtitleStyle}
+              text={t('OnboardingTaxIdentificationNumberLblSubtitle')}
+              variant={variants.bodyRegularM}
+            />
+          </View>
+        </View>
+        <View id="vwBody" style={styles.bodyStyle}>
+          <View id="vwSection" style={styles.sectionStyle}>
+            <Components.Label
+              id="lblChipTitle"
+              style={styles.lblChipTitleStyle}
+              variant={variants.bodyMediumM}
+              text={t('OnboardingTaxIdentificationNumberLblNumber')}
+            />
+            <Components.Tab
+              id="btnOption"
+              data={DATA}
+              size={SizeType.small}
+              onSelect={(item: TabItemType) => {
+                setSelectedTab(item);
+                formik.setFieldValue('SelectedTab', item.name);
+              }}
+              selectedTab={selectedTab}
+              children={
+                selectedTab ? (
+                  selectedTab?.name === 'Yes' ? (
+                    <View style={styles.dropdownStyle}>
+                      <Components.Input
+                        id="txtIdentificationNumber"
+                        placeholder={t(
+                          'OnboardingTaxIdentificationNumberTxtNumber',
+                        )}
+                        inverted={false}
+                        value={formik.values.identificationNumber}
+                        setValue={formik.handleChange('identificationNumber')}
+                        clearInputValue={() =>
+                          formik.setFieldValue('identificationNumber', '')
+                        }
+                        onFormikBlur={formik.handleBlur('identificationNumber')}
+                        errorText={
+                          formik.touched.identificationNumber &&
+                          formik.errors.identificationNumber
+                            ? formik.errors.identificationNumber
+                            : undefined
+                        }
+                        maximumLength={PhoneNumberLength9}
+                      />
+                    </View>
+                  ) : (
+                    <View style={styles.dropdownStyle}>
+                      <Components.Dropdown
+                        id="ddChooseContry"
+                        inputText={formik.values.reason}
+                        onPress={() => setVisible(!visible)}
+                        placeholder={t(
+                          'OnboardingTaxIdentificationNumberDdReason',
+                        )}
+                        errorText={formik.errors.reason}
+                        BottomSheet={
+                          <Components.BottomSheet
+                            id="bsCountry"
+                            visible={visible}
+                            closeButtonIcon
+                            onClose={() => setVisible(!visible)}>
+                            <Components.OptionButton
+                              id="btnOptions"
+                              data={ReasonData}
+                              onSelect={onSelectItem}
+                              selectedItem={selectedOption}
+                            />
+                          </Components.BottomSheet>
+                        }
+                      />
+                    </View>
+                  )
+                ) : null
+              }
+            />
+          </View>
+        </View>
+      </View>
+    </Components.ScreenContainer>
+  );
+};
+
+export default TaxIdentificationNumber;
+
     
