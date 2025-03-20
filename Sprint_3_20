@@ -1,43 +1,58 @@
 Sub Module	VBL Changes Analysis	API Design Readiness(Swagger Definition)	 CMS Design	"UI Development  
 Mobile (iOS,Android)"	"UI Development 
- Web "	Mock API integration 
+ Web "	Mock API integration 	UI Internal Code Review
 E2E Straight Through flow	100%	100%	100%	100%	100%	"Mobile 100% ETA (16th Mar)
 Web 40% (17th Mar)
-(20th Mar)"
+(20th Mar)"	"100% Mob ETA (16th Mar)
+80% (ETA 20th Mar)
+"
 Resumption Flows	100%	100%	100%	100% (13-Mar)	"100% (16-Mar)
 18-Mar 19-Mar"	"Mobile 100% ETA (17th Mar)
 Web 30% (18th Mar)
-"
+"	"100% Mob ETA (18th Mar)  
+50% Web (ETA 20th Mar)"
 Debit Card Creation	100%	100%	100%	100%	"100% (16-Mar)
 17-Mar"	"Mobile 70% ETA (17th Mar)
 Web 20% (18th Mar)
-"
+"	"90% Mob ETA (20th Mar)
+60% (ETA 20-Mar)"
 Rating	100%	100%	100%	100%	"100% (16-Mar)
 17-Mar"	"Mobile 80% ETA (17th Mar)
 Web 20% (18th Mar)
-"
+"	"Mobile 80% ETA (20th Mar)
+Web 60% (ETA 20th Mar)"
 E2E Straight Through flow	100%	100%	100%	100% (13-Mar)	100%	"Mobile 80% ETA (17th Mar)
 Web 20% (18th Mar)
-"
+"	" 90% Mobile ETA (20th Mar)
+60% Web (ETA 20th-Mar)"
 Resumption Flows - Pre Login	100%	100%	100%	100% (16-Mar)	100% (18-Mar)	"Mobile 60% ETA (17th Mar)
 Web 0% (19th Mar)
-"
+"	" 80% Mob ETA (20th Mar)
+10% Web (ETA 20-Mar)"
 Resumption Flows - Post Login	100%	100%	100%	100% (16-Mar)	0% (20-Mar)	"Mobile 0% 
 Web 0% 
 (20th Mar)
-"
+"	" 80% Mob ETA (21st Mar)
+0% Web (ETA 21st-Mar)"
 Credentials Login	"New vbl changes analysis based on IAM, ETA 13th Mar
 18-Mar, Have a scheduled call on 19th Mar"	100%	100%	100%	100%	"Mobile 60% 
 Web 40% 
-(20th Mar)"
-Biometric Login		100%	100%	100%	NA	
-Passcode Login		100%	100%	100%	NA	TBD
-Pre Login Functions - Disable Credentails / Forgot Credentials		50% (ETA 19-Mar)	100%	100%	100%	
-Credentials Update - Password, Passcode & Biometric	TBD	50% (ETA 19-Mar)	100%	100%	100%	
+(20th Mar)"	" 80% Mob ETA (21st Mar)
+80% Web (ETA 21st-Mar)"
+Biometric Login		100%	100%	100%	NA		100%
+Passcode Login		100%	100%	100%	NA	TBD	 100% Mob ETA (18th Mar)
+Pre Login Functions - Disable Credentails / Forgot Credentials		50% (ETA 19-Mar)	100%	100%	100%		" 100% Mob ETA (19th Mar)
+100% Web (ETA 19th-Mar)"
+Credentials Update - Password, Passcode & Biometric	TBD	50% (ETA 19-Mar)	100%	100%	100%		" 100% Mob ETA (19th Mar)
+100% Web (ETA 19th-Mar)"
 TPIN & Security Tips		TBD	100%	100%	"70% (19-Mar)
-23-Mar"	
+23-Mar"		" 100% Mob ETA (18th Mar)
+50% Web (ETA 22nd-Mar)"
 Trusted Device Management	TBD	TBD	100%	100%	"70% (19-Mar)
-23-Mar"	
-Logout / Timeout		50% (ETA 19-Mar)	100%	100%	100%	
-Minor	Dependent on Transaction detail finalization		100%	80%	0%	
-Minor	NA		100%	80%	0%	
+23-Mar"		" 90% Mob ETA (18th Mar)
+50% Web (ETA 22nd-Mar)"
+Logout / Timeout		50% (ETA 19-Mar)	100%	100%	100%		100%
+Minor	Dependent on Transaction detail finalization		100%	80%	0%		" 80% Mob ETA (17th Mar)
+0% Web (ETA 23rd-Mar)"
+Minor	NA		100%	80%	0%		" 80% Mob ETA (17th Mar)
+0% Web (ETA 23rd-Mar)"
