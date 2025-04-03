@@ -1,0 +1,633 @@
+import {useState, useEffect} from 'react';
+import {useFormik} from 'formik';
+import {useNewTheme, translation} from 'react-core';
+import {
+  GetFieldKeyValue,
+  GetRetriveLookUpDataItem,
+} from '@app/features/onboarding/use-onboarding-hook/';
+import {
+  FieldKey,
+  setCustomerOnboardingFieldsData,
+  setRetriveOnboardingFieldData,
+  uiOnboardingState,
+} from 'app/services/app-global';
+import {userPrefence} from 'app/utils/session-handler';
+import {useAppDispatch, useAppSelector} from 'app/redux/hooks';
+import {useNavigation} from '@react-navigation/native';
+import {OnboardingRoutes} from 'app/constants';
+import {OnboardingRootStackParamList} from 'app/navigator/onboarding-section';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {
+  useRetrieveOnboardingFieldsMutation,
+  useUpdateOnboardingFieldsMutation,
+} from 'app/redux/toolkit-store';
+import {RootState} from '@app/redux';
+import useRequestHandler from './use-service';
+import {DispatchAndNavigateType, EndEditingInputField, EntityTypes} from './types';
+import {OptionItemType} from 'app/components/option-button/types';
+import {OnboardingEnterNameSchema} from '../schemas/onboarding-enter-name';
+import {OnboardingHomeAddressSchema} from '../schemas/onboarding-home-address';
+
+/**
+Author: Prateek
+Date Created: 01/04/2025
+* Hook for handling logic for Personal info screen.
+*
+* Allows users to:
+* - Handles fetch/submit of personal information.
+*/
+
+const usePersonalDetails = () => {
+  const {t} = translation.useTranslation();
+  const theme = useNewTheme();
+  const userSelection = userPrefence.getString('userSelection') ?? 'CreditCard';
+  const idValue = userPrefence.getString('NationalID');
+  const evaluateProspectToken = useAppSelector(
+    (state: RootState) => state.global.evaluateProspectToken,
+  );
+
+  const nationalID = useAppSelector(
+    (state: RootState) => state.global.userInput.nationalId,
+  );
+
+  const customerData = useAppSelector(
+    (state: RootState) =>
+      state.global.customerOnboardingFieldsData?.[nationalID],
+  );
+
+  const [isHomeChkBoxChecked, setIsHomeChkBoxChecked] =
+    useState<boolean>(false);
+  const [visibleHomeBtmSht, setVisibleHomeBtmSht] = useState<boolean>(false);
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const titleOptionData = GetRetriveLookUpDataItem({
+    entityKey: EntityTypes.TTL,
+  });
+
+  const maritalOptionData = GetRetriveLookUpDataItem({
+    entityKey: EntityTypes.MRS,
+  });
+
+  const educationOptionData = GetRetriveLookUpDataItem({
+    entityKey: EntityTypes.EDU,
+  });
+
+  const countryData = GetRetriveLookUpDataItem({entityKey: EntityTypes.NAT});
+
+  const [filteredCountry, setFilteredCountry] = useState(countryData);
+
+  const navigation: NativeStackNavigationProp<OnboardingRootStackParamList> =
+    useNavigation();
+
+  const {
+    serviceName: UpdateOnboardingFieldsServices,
+    loading: isLoading,
+    error: updateError,
+    isSuccess: updateIsSuccess,
+    data: updateData,
+  } = useRequestHandler(useUpdateOnboardingFieldsMutation);
+
+  const [
+    RetriveOnboardingFieldsServices,
+    {data: retrive, isSuccess: successRetriveEmail},
+  ] = useRetrieveOnboardingFieldsMutation();
+
+  console.log(
+    'update personal details',
+    updateData,
+    updateIsSuccess,
+    updateError,
+    customerData,
+  );
+
+  const dependentOptionData = [
+    {id: '1', value: t('OnboardingDependantsBtn1'), code: '1'},
+    {id: '2', value: t('OnboardingDependantsBtn2'), code: '2'},
+    {id: '3', value: t('OnboardingDependantsBtn3'), code: '3'},
+    {id: '4', value: t('OnboardingDependantsBtn4'), code: '4'},
+    {id: '5', value: t('OnboardingDependantsBtn5'), code: '5'},
+  ];
+
+  const housingOptionsData = [
+    {value: t('LivingArrangementC'), id: '2', code: '2'},
+    {value: t('LivingArrangementO'), id: '1', code: '1'},
+    {value: t('LivingArrangementP'), id: '3', code: '3'},
+    {value: t('LivingArrangementR'), id: '4', code: '4'},
+  ];
+
+  const dispatch = useAppDispatch();
+
+  const formikEnterName = useFormik({
+    validateOnChange: true,
+    validateOnBlur: true,
+    validateOnMount: true,
+    initialValues: {
+      firstName: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.firstName,
+      }),
+      secondName: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.middleName,
+      }),
+      thirdName: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.familyName,
+      }),
+      familyName: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.lastName,
+      }),
+    },
+    validationSchema: OnboardingEnterNameSchema,
+    onSubmit: values => {
+      navigation.navigate(OnboardingRoutes.Title, {
+        name: 'Title',
+      });
+    },
+  });
+
+  useEffect(() => {
+    dispatch(
+      setCustomerOnboardingFieldsData({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        data: {
+          fieldKey: FieldKey.isCCWithOnePack,
+          value: userSelection === 'CreditCard' ? true : false,
+        },
+      }),
+    );
+    dispatch(
+      setCustomerOnboardingFieldsData({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        data: {
+          fieldKey: FieldKey.customerChosenCardType,
+          value: false,
+        },
+      }),
+    );
+  }, []);
+
+  const updatePersonalDetailsFieldsServices = () => {
+    const uiStateIndex = customerData.findIndex(
+      item => item.uiState === uiOnboardingState.Personal_Details_Completed,
+    );
+    console.log(uiStateIndex, customerData[uiStateIndex].data);
+    if (uiStateIndex !== -1) {
+      UpdateOnboardingFieldsServices({
+        data: [
+          ...customerData[uiStateIndex].data,
+        ],
+        nationalID,
+        token: evaluateProspectToken,
+        uiState: uiOnboardingState.Personal_Details_Completed,
+      });
+    }
+  };
+
+  const formikHomeAddress = useFormik({
+    validateOnChange: true,
+    validateOnBlur: true,
+    validateOnMount: true,
+    initialValues: {
+      StreetAddress: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.streetNameAndNumber,
+      }),
+      StreetAddress2: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.area,
+      }),
+      City: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.city,
+      }),
+      ZipCode: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.zipCode,
+      }),
+      Country: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.country,
+      }),
+      StreetDistrict: GetFieldKeyValue({
+        uiState: uiOnboardingState.Personal_Details_Completed,
+        fieldKey: FieldKey.district,
+      }),
+    },
+    validationSchema: OnboardingHomeAddressSchema,
+    onSubmit: () => {
+      navigation.navigate(OnboardingRoutes.Title, {
+        name: 'Title',
+      });
+    },
+  });
+
+  const [titleSelectedItem, setSelectedTitleItem] =
+    useState<OptionItemType | null>(null);
+
+  const [maritalSelectedItem, setSelectedMaritalItem] =
+    useState<OptionItemType | null>(null);
+
+  const [dependentSelectedItem, setSelectedDependentItem] =
+    useState<OptionItemType | null>(null);
+
+  const [housingSelectedItem, setSelectedHousingItem] =
+    useState<OptionItemType>();
+
+  const [educationSelectedItem, setSelectedEducationItem] =
+    useState<OptionItemType | null>(null);
+
+  const titleFieldValue = GetFieldKeyValue({
+    uiState: uiOnboardingState.Personal_Details_Completed,
+    fieldKey: FieldKey.title,
+  });
+
+  const maritalFieldValue = GetFieldKeyValue({
+    uiState: uiOnboardingState.Personal_Details_Completed,
+    fieldKey: FieldKey.familyStatusCode,
+  });
+
+  const dependentFieldValue = GetFieldKeyValue({
+    uiState: uiOnboardingState.Personal_Details_Completed,
+    fieldKey: FieldKey.numberOfDependents,
+  });
+
+  const housingFieldValue = GetFieldKeyValue({
+    uiState: uiOnboardingState.Personal_Details_Completed,
+    fieldKey: FieldKey.residentialStatus,
+  });
+
+  const educationFieldValue = GetFieldKeyValue({
+    uiState: uiOnboardingState.Personal_Details_Completed,
+    fieldKey: FieldKey.levelOfEducationId,
+  });
+
+  const isApplicationExist = useAppSelector(
+    (state: RootState) => state.global.isApplicationExists,
+  );
+
+  const dispatchAndNavigate = ({
+    uiState,
+    fieldKey,
+    value,
+    name,
+    navigateScreen,
+  }: DispatchAndNavigateType) => {
+    dispatch(
+      setCustomerOnboardingFieldsData({
+        uiState,
+        data: {
+          fieldKey,
+          value,
+        },
+      }),
+    );
+    if (navigateScreen) {
+      navigation.navigate(navigateScreen, {
+        name,
+      });
+    }
+  };
+
+  const onSelectTitleItem = (item: OptionItemType) => {
+    setSelectedTitleItem(item);
+    dispatchAndNavigate({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.title,
+      value: `${item.code}`,
+      name: 'MaritalStatus',
+      navigateScreen: OnboardingRoutes.MaritalStatus,
+    });
+  };
+
+  const onSelectMaritalItem = (item: OptionItemType) => {
+    setSelectedMaritalItem(item);
+    dispatchAndNavigate({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.familyStatusCode,
+      value: `${item.code}`,
+      name: userSelection === 'CreditCard' ? 'Dependants' : 'EducationLevel',
+      navigateScreen:
+        userSelection === 'CreditCard'
+          ? OnboardingRoutes.Dependants
+          : OnboardingRoutes.EducationalLevel,
+    });
+  };
+
+  const onSelectDependentItem = (item: OptionItemType) => {
+    setSelectedDependentItem(item);
+    dispatchAndNavigate({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.numberOfDependents,
+      value: `${item.code}`,
+      name: 'EducationLevel',
+      navigateScreen: OnboardingRoutes.EducationalLevel,
+    });
+  };
+
+  const onSelectHousingItem = (item: OptionItemType) => {
+    dispatchAndNavigate({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.residentialStatus,
+      value: `${item.code}`,
+      name: undefined,
+      navigateScreen: undefined,
+    });
+    setSelectedHousingItem(item);
+  };
+
+  const onSelectEducationItem = (item: OptionItemType) => {
+    setSelectedEducationItem(item);
+    dispatchAndNavigate({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.levelOfEducationId,
+      value: `${item.id}`,
+      name:
+        userSelection === 'CreditCard'
+          ? OnboardingRoutes.OnboardingHousing
+          : '',
+      navigateScreen:
+        userSelection === 'CreditCard'
+          ? OnboardingRoutes.OnboardingHousing
+          : '',
+    });
+  };
+
+  const goBackBtnOnPressTitle = () => {
+    if (isApplicationExist) {
+      RetriveOnboardingFieldsServices({
+        uiState: uiOnboardingState.Email_Verification_Completed,
+        nationalID,
+        token: evaluateProspectToken,
+      });
+    } else {
+      navigation.pop();
+    }
+  };
+
+  useEffect(() => {
+    if (successRetriveEmail && retrive.data) {
+      console.log('housing Field useEffect --- service');
+      dispatch(
+        setRetriveOnboardingFieldData({
+          uiState: uiOnboardingState.Email_Verification_Completed,
+          data: retrive.data,
+        }),
+      );
+      navigation.replace(OnboardingRoutes.Email, {
+        name: 'Email',
+      });
+    }
+  }, [successRetriveEmail]);
+
+  useEffect(() => {
+    console.log('title Field useEffect');
+    const i = titleOptionData.findIndex(data => data.code === titleFieldValue);
+    if (i !== -1) {
+      console.log('title inside Field useEffect');
+      setSelectedTitleItem(titleOptionData[i]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleOptionData]);
+
+  useEffect(() => {
+    const i = maritalOptionData.findIndex(
+      data => data.code === maritalFieldValue,
+    );
+    if (i !== -1) {
+      console.log('martial Field useEffect');
+      setSelectedMaritalItem(maritalOptionData[i]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maritalOptionData]);
+
+  useEffect(() => {
+    console.log('dependent Field useEffect');
+    const i = dependentOptionData.findIndex(
+      data => data.id === dependentFieldValue,
+    );
+    console.log(i, 'dependents');
+    if (i !== -1) {
+      setSelectedDependentItem(dependentOptionData[i]);
+    }
+  }, [dependentFieldValue]);
+
+  useEffect(() => {
+    console.log('housing Field useEffect');
+    const setValue = housingOptionsData.findIndex(
+      data => data.id === housingFieldValue,
+    );
+    if (setValue !== -1) {
+      setSelectedHousingItem(housingOptionsData[setValue]);
+    }
+  }, [housingFieldValue]);
+
+  useEffect(() => {
+    const i = educationOptionData.findIndex(
+      data => data?.id === educationFieldValue,
+    );
+    if (i !== -1) {
+      setSelectedEducationItem(educationOptionData[i]);
+    }
+  }, [educationFieldValue]);
+
+  useEffect(() => {
+    console.log('housing Field useEffect', updateData, updateError);
+    if (updateIsSuccess && updateData?.isSuccess === 'true') {
+      navigation.navigate(OnboardingRoutes.OnboardingAccountPurpose, {
+        name: OnboardingRoutes.OnboardingAccountPurpose,
+      });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateIsSuccess]);
+
+  const onEndEditingInputField = ({
+    uiState,
+    fieldKey,
+    value,
+  }: EndEditingInputField) => {
+    dispatch(
+      setCustomerOnboardingFieldsData({
+        uiState,
+        data: {
+          fieldKey,
+          value,
+        },
+      }),
+    );
+  };
+
+  const onEndEditingFirstName = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.firstName,
+      value: `${formikEnterName.values.firstName}`,
+    });
+  };
+
+  const onEndEditingSecondName = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.middleName,
+      value: `${formikEnterName.values.secondName}`,
+    });
+  };
+
+  const onEndEditingThirdName = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.familyName,
+      value: `${formikEnterName.values.thirdName}`,
+    });
+  };
+
+  const onEndEditingFamilyName = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.lastName,
+      value: `${formikEnterName.values.familyName}`,
+    });
+  };
+
+  const isSubmitFormikEnterNameDisabled = () => {
+    const allFilled = Object.values(formikEnterName.values).every(
+      v => v?.trim() ?? '' !== '',
+    );
+    return !(formikEnterName.isValid && allFilled);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    const filtered = countryData.filter(country =>
+      country?.value.toLowerCase().startsWith(value.toLowerCase()),
+    );
+    setFilteredCountry(filtered);
+  };
+
+  const handleCountryToggle = ({
+    item,
+  }: {
+    item: OnboardingHomeAddressDataProperties;
+  }) => {
+    setSelectedCountry(item.value);
+    formikHomeAddress.setFieldValue('Country', item.value);
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.country,
+      value: `${item.id}`,
+    });
+    setVisibleHomeBtmSht(false);
+  };
+
+  const onEndEditingAddress = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.streetNameAndNumber,
+      value: `${formikHomeAddress.values.StreetAddress}`,
+    });
+  };
+
+  const onEndEditingAddress2 = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.area,
+      value: `${formikHomeAddress.values.StreetAddress2}`,
+    });
+  };
+
+  const onEndEditingCity = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.city,
+      value: `${formikHomeAddress.values.City}`,
+    });
+  };
+
+  const onEndEditingDistrict = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.district,
+      value: `${formikHomeAddress.values.StreetDistrict}`,
+    });
+  };
+
+  const onEndEditingZipCode = () => {
+    onEndEditingInputField({
+      uiState: uiOnboardingState.Personal_Details_Completed,
+      fieldKey: FieldKey.zipCode,
+      value: `${formikHomeAddress.values.ZipCode}`,
+    });
+  };
+
+  const onPressHomeBtnSht = () => {
+    setVisibleHomeBtmSht(!visibleHomeBtmSht);
+  };
+
+  const openHomeAdrBtmSht = () => {
+    setVisibleHomeBtmSht(true);
+  };
+
+  const onPressHomeAdsChkBox = () => {
+    setIsHomeChkBoxChecked(!isHomeChkBoxChecked);
+  };
+
+  const isHomeAdsBtnDisabled = () => {
+    const allFilled = Object.values(formikHomeAddress.values).every(
+      v => v?.trim() ?? '' !== '',
+    );
+    return !(formikHomeAddress.isValid && allFilled && isHomeChkBoxChecked);
+  };
+
+  return {
+    userSelection,
+    idValue,
+    theme,
+    t,
+    customerData,
+    titleOptionData,
+    maritalOptionData,
+    dependentOptionData,
+    housingOptionsData,
+    educationOptionData,
+    titleSelectedItem,
+    maritalSelectedItem,
+    dependentSelectedItem,
+    housingSelectedItem,
+    educationSelectedItem,
+    goBackBtnOnPressTitle,
+    onSelectTitleItem,
+    onSelectMaritalItem,
+    onSelectDependentItem,
+    onSelectHousingItem,
+    onSelectEducationItem,
+    formikEnterName,
+    formikHomeAddress,
+    onEndEditingFirstName,
+    onEndEditingSecondName,
+    onEndEditingThirdName,
+    onEndEditingFamilyName,
+    isSubmitFormikEnterNameDisabled,
+    isHomeChkBoxChecked,
+    visibleHomeBtmSht,
+    selectedCountry,
+    searchQuery,
+    filteredCountry,
+    handleSearch,
+    handleCountryToggle,
+    onEndEditingAddress,
+    onEndEditingAddress2,
+    onEndEditingCity,
+    onEndEditingDistrict,
+    onEndEditingZipCode,
+    onPressHomeAdsChkBox,
+    onPressHomeBtnSht,
+    isHomeAdsBtnDisabled,
+    openHomeAdrBtmSht,
+    updatePersonalDetailsFieldsServices,
+  };
+};
+
+export {usePersonalDetails};
